@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "prismaflow: PRISMA 2020 flow diagrams in Python"
+version: 0.1.0
+date-released: 2026-11-06
+license: MIT
+authors:
+  - family-names: Luke
+    given-names: Moses
+    orcid: "https://orcid.org/0000-0002-0600-6660"
+repository-code: "https://github.com/Moses-L/prismaflow"

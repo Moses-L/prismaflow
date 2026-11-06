@@ -1,0 +1,20 @@
+data,label,n,url,tooltip,notes
+previous_studies,,,,,Studies included in previous version of review
+previous_reports,,,,,Reports of studies included in previous version
+identified_databases,,,,,Records identified from databases
+identified_registers,,,,,Records identified from registers
+duplicates,,,,,Duplicate records removed
+excluded_automatic,,,,,Records marked ineligible by automation tools
+excluded_other,,,,,Records removed for other reasons
+excluded_screening,,,,,Records excluded at title/abstract screening
+not_retrieved,,,,,Reports not retrieved
+reason_db,Wrong population,,,,One row per full-text exclusion reason
+reason_db,Wrong outcome,,,,
+new_studies,,,,,New studies included in review
+new_reports,,,,,Reports of new included studies
+other_websites,,,,,Other methods: records from websites (optional)
+other_organisations,,,,,Other methods: records from organisations (optional)
+other_citation_searching,,,,,Other methods: citation searching (optional)
+other_sought,,,,,Other methods: reports sought (defaults to total identified)
+other_not_retrieved,,,,,Other methods: reports not retrieved
+reason_other,Wrong design,,,,Other methods: one row per exclusion reason
