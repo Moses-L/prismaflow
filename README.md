@@ -1,4 +1,5 @@
 # moseslukeprismagraphpy
+PRISMA 2020 flow diagram generator in Python
 
 [![DOI](https://zenodo.org/badge/1447951698.svg)](https://doi.org/10.5281/zenodo.24004986)
 
