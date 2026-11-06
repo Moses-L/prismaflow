@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import html
+import re
 from pathlib import Path
 from typing import Iterable, List, Optional, Union
 
-from graphviz import Digraph
+from graphviz import Digraph, ExecutableNotFound
 
 from .data import PrismaData
 
@@ -37,6 +38,28 @@ _LINK_KEYS = {
 }
 
 
+def _esc(text: str) -> str:
+    """Neutralise Graphviz escape sequences (\\n, \\l, ...) in user-supplied text."""
+    return str(text).replace("\\", "\\\\")
+
+
+def _safe_url(url: str) -> str:
+    """Percent-encode characters that would break the DOT or SVG markup."""
+    out = str(url).strip()
+    for ch, enc in (("\\", "%5C"), ('"', "%22"), ("<", "%3C"), (">", "%3E"), (" ", "%20")):
+        out = out.replace(ch, enc)
+    return out
+
+
+_BARE_AMP = re.compile(r"&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)")
+_HREF = re.compile(r'(xlink:href=")([^"]*)(")')
+
+
+def _fix_hrefs(svg: str) -> str:
+    """Graphviz leaves bare '&' in hrefs, which is invalid XML; escape them."""
+    return _HREF.sub(lambda m: m.group(1) + _BARE_AMP.sub("&amp;", m.group(2)) + m.group(3), svg)
+
+
 def _left(lines: List[str]) -> str:
     """Left-aligned multi-line label (Graphviz \\l line terminators)."""
     return "".join(f"{ln}\\l" for ln in lines)
@@ -54,7 +77,7 @@ def build_graph(data: PrismaData, dpi: Optional[int] = None, title: Optional[str
     if dpi:
         g.attr(dpi=str(dpi))
     if title:
-        g.attr(label=title, labelloc="t", fontname="Helvetica-Bold", fontsize="16")
+        g.attr(label=_esc(title), labelloc="t", fontname="Helvetica-Bold", fontsize="16")
     g.attr("node", shape="box", fontname="Helvetica", fontsize="11", margin="0.15,0.08", width="3.1")
     g.attr("edge", arrowsize="0.7", penwidth="1.1")
 
@@ -62,16 +85,16 @@ def build_graph(data: PrismaData, dpi: Optional[int] = None, title: Optional[str
         attrs = dict(label=label, style="filled", fillcolor=fill, **kw)
         key = _LINK_KEYS.get(nid)
         if key and key in data.urls:
-            attrs["URL"] = data.urls[key]
+            attrs["URL"] = _safe_url(data.urls[key])
             attrs["target"] = "_blank"
         if key and key in data.tooltips:
-            attrs["tooltip"] = data.tooltips[key]
+            attrs["tooltip"] = _esc(data.tooltips[key])
         elif key and key in data.urls:
-            attrs["tooltip"] = data.urls[key]
+            attrs["tooltip"] = _esc(_safe_url(data.urls[key]))
         g.node(nid, **attrs)
 
     def reasons(title_line: str, mapping) -> str:
-        lines = [title_line] + [f"{k} (n = {v})" for k, v in mapping.items()]
+        lines = [title_line] + [f"{_esc(k)} (n = {v})" for k, v in mapping.items()]
         return _left(lines)
 
     # --- phase labels ---------------------------------------------------
@@ -198,9 +221,16 @@ def build_graph(data: PrismaData, dpi: Optional[int] = None, title: Optional[str
     return g
 
 
+GRAPHVIZ_HELP = (
+    "Graphviz is not installed or not on PATH. Install it (Ubuntu: 'sudo apt install graphviz', "
+    "macOS: 'brew install graphviz', Windows: installer from https://graphviz.org/download/, "
+    "conda: 'conda install -c conda-forge graphviz') and try again."
+)
+
+
 def to_svg(data: PrismaData, title: Optional[str] = None) -> str:
     """Return the diagram as an SVG string (hyperlinks and tooltips included)."""
-    return build_graph(data, title=title).pipe(format="svg").decode("utf-8")
+    return _fix_hrefs(build_graph(data, title=title).pipe(format="svg").decode("utf-8"))
 
 
 def to_html(data: PrismaData, title: str = "PRISMA 2020 flow diagram") -> str:
@@ -233,19 +263,33 @@ def render(
     png, svg, pdf, html (interactive) and dot (Graphviz source).
     """
     out = Path(out)
+    if out.suffix.lstrip(".").lower() in ALL_FORMATS:  # tolerate "figure.png" as the stem
+        out = out.with_suffix("")
+    formats = [formats] if isinstance(formats, str) else list(formats)
+    formats = [f.lower().lstrip(".") for f in formats]
+    for fmt in formats:
+        if fmt not in ALL_FORMATS:
+            raise ValueError(f"Unsupported format '{fmt}'. Choose from: {', '.join(ALL_FORMATS)}")
+    data.validate()
     out.parent.mkdir(parents=True, exist_ok=True)
     written: List[Path] = []
     for fmt in formats:
-        fmt = fmt.lower().lstrip(".")
-        if fmt not in ALL_FORMATS:
-            raise ValueError(f"Unsupported format '{fmt}'. Choose from: {', '.join(ALL_FORMATS)}")
-        path = out.with_suffix(f".{fmt}")
-        if fmt == "html":
-            path.write_text(to_html(data, title or "PRISMA 2020 flow diagram"), encoding="utf-8")
-        elif fmt == "dot":
-            path.write_text(build_graph(data, title=title).source, encoding="utf-8")
-        else:
-            g = build_graph(data, dpi=dpi if fmt == "png" else None, title=title)
-            path.write_bytes(g.pipe(format=fmt))
+        path = out.parent / f"{out.name}.{fmt}"
+        try:
+            _write(data, path, fmt, dpi, title)
+        except ExecutableNotFound as exc:
+            raise RuntimeError(GRAPHVIZ_HELP) from exc
         written.append(path)
     return written
+
+
+def _write(data: PrismaData, path: Path, fmt: str, dpi: int, title: Optional[str]) -> None:
+    if fmt == "html":
+        path.write_text(to_html(data, title or "PRISMA 2020 flow diagram"), encoding="utf-8")
+    elif fmt == "dot":
+        path.write_text(build_graph(data, title=title).source, encoding="utf-8")
+    elif fmt == "svg":
+        path.write_text(to_svg(data, title=title), encoding="utf-8")
+    else:
+        g = build_graph(data, dpi=dpi if fmt == "png" else None, title=title)
+        path.write_bytes(g.pipe(format=fmt))

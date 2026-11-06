@@ -103,3 +103,129 @@ def test_html_is_interactive():
 def test_cli_example(tmp_path):
     assert main(["draw", "--example", "-o", str(tmp_path / "x"), "-f", "svg"]) == 0
     assert (tmp_path / "x.svg").exists()
+
+
+# ---------------------------------------------------------------- regression tests
+import re
+import xml.etree.ElementTree as ET
+
+
+def _texts(svg):
+    return re.findall(r"<text[^>]*>([^<]*)</text>", svg)
+
+
+def test_unknown_count_key_rejected():
+    with pytest.raises(ValueError, match="Unknown count"):
+        PrismaData(counts={"duplicate": 5})
+
+
+@pytest.mark.parametrize("bad", ["abc", 2.5, True, None])
+def test_non_whole_numbers_rejected(bad):
+    with pytest.raises(ValueError):
+        PrismaData(counts={"duplicates": bad})
+
+
+def test_numeric_strings_and_integer_floats_accepted():
+    d = PrismaData(counts={"identified_databases": "1,200", "duplicates": 10.0})
+    assert d.counts == {"identified_databases": 1200, "duplicates": 10}
+
+
+def test_negative_reason_rejected():
+    d = basic()
+    d.reasons_db["Bad"] = -3
+    with pytest.raises(ValueError):
+        d.validate()
+
+
+def test_csv_errors(tmp_path):
+    f = tmp_path / "bad.csv"
+    f.write_text("data,label,n\nduplicates,,abc\n")
+    with pytest.raises(ValueError, match="not a number"):
+        PrismaData.from_csv(f)
+    with pytest.raises(FileNotFoundError):
+        PrismaData.from_csv(tmp_path / "missing.csv")
+
+
+def test_csv_bom_comments_commas(tmp_path):
+    f = tmp_path / "bom.csv"
+    f.write_bytes(
+        "\ufeffdata,label,n\n# a comment row,,\nidentified_databases,,\"1,200\"\n,,\nduplicates,,10\n".encode("utf-8")
+    )
+    assert PrismaData.from_csv(f).counts == {"identified_databases": 1200, "duplicates": 10}
+
+
+@needs_dot
+@pytest.mark.parametrize(
+    "reason",
+    ["Path C:\\new\\left", "ends with \\", 'Wrong "design" & <scope>', "a|b {c}", "Étude – 研究"],
+)
+def test_user_text_rendered_literally(reason):
+    from prismaflow import to_svg
+
+    d = basic()
+    d.reasons_db = {reason: 10}
+    svg = to_svg(d)
+    ET.fromstring(svg)  # must stay valid XML
+    import html as _h
+
+    assert any(_h.unescape(t).startswith(reason) for t in _texts(svg))
+
+
+@needs_dot
+def test_urls_with_ampersands_and_quotes_give_valid_xml(tmp_path):
+    d = basic()
+    d.urls = {"identified_databases": 'https://a.org/x?y=1&z=2&w="q"<>'}
+    d.tooltips = {"identified_databases": 'T & <t> "q" \\n'}
+    paths = render(d, tmp_path / "o", ["svg", "html"])
+    ET.fromstring(paths[0].read_text())
+    page = paths[1].read_text()
+    ET.fromstring(page[page.find("<svg"): page.rfind("</svg>") + 6])
+    assert "y=1&amp;z=2" in paths[0].read_text()
+
+
+@needs_dot
+def test_dotted_stem_and_extension_in_stem(tmp_path):
+    p1 = render(basic(), tmp_path / "fig.v1", ["svg"])[0]
+    assert p1.name == "fig.v1.svg"
+    p2 = render(basic(), tmp_path / "fig2.png", ["svg"])[0]
+    assert p2.name == "fig2.svg"
+
+
+@needs_dot
+def test_single_format_string_and_bad_format(tmp_path):
+    assert render(basic(), tmp_path / "s", "svg")[0].exists()
+    with pytest.raises(ValueError, match="Unsupported"):
+        render(basic(), tmp_path / "b", ["png", "gif"])
+    assert not (tmp_path / "b.png").exists()  # nothing partially written
+
+
+@needs_dot
+@pytest.mark.parametrize(
+    "counts",
+    [
+        {},
+        {"identified_registers": 50, "excluded_screening": 10, "new_studies": 30},
+        {"identified_databases": 20, "previous_studies": 5, "new_studies": 3},
+        {"identified_databases": 20, "other_websites": 10, "other_sought": 8, "new_studies": 3},
+    ],
+)
+def test_arm_combinations_render(tmp_path, counts):
+    assert render(PrismaData(counts=counts), tmp_path / "a", ["svg", "png"], dpi=50)
+
+
+def test_cli_errors(tmp_path, capsys):
+    assert main(["draw", str(tmp_path / "nope.csv")]) == 1
+    assert "file not found" in capsys.readouterr().err
+    bad = tmp_path / "bad.csv"
+    bad.write_text("data,label,n\nduplicates,,5000\nidentified_databases,,10\n")
+    assert main(["draw", str(bad), "-o", str(tmp_path / "o")]) == 1
+    assert "negative" in capsys.readouterr().err
+    with pytest.raises(SystemExit):
+        main(["draw"])
+
+
+@needs_dot
+def test_cli_template_then_draw_example_csv(tmp_path):
+    t = tmp_path / "t.csv"
+    assert main(["template", "-o", str(t)]) == 0
+    assert t.exists()

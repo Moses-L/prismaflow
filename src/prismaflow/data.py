@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 # Count fields accepted in the CSV ``data`` column.
 COUNT_FIELDS = [
@@ -83,6 +83,16 @@ class PrismaData:
     reasons_other: Dict[str, int] = field(default_factory=dict)
     urls: Dict[str, str] = field(default_factory=dict)
     tooltips: Dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        clean: Dict[str, int] = {}
+        for key, val in self.counts.items():
+            if key not in COUNT_FIELDS:
+                raise ValueError(f"Unknown count '{key}'. Valid counts: {', '.join(COUNT_FIELDS)}")
+            clean[key] = _coerce(val, key)
+        self.counts = clean
+        self.reasons_db = {str(k): _coerce(v, f"reason '{k}'") for k, v in self.reasons_db.items()}
+        self.reasons_other = {str(k): _coerce(v, f"reason '{k}'") for k, v in self.reasons_other.items()}
 
     # ------------------------------------------------------------------ access
     def get(self, key: str, default: int = 0) -> int:
@@ -167,6 +177,9 @@ class PrismaData:
         for k, v in self.counts.items():
             if v < 0:
                 problems.append(f"{k} is negative ({v})")
+        for k, v in {**self.reasons_db, **self.reasons_other}.items():
+            if v < 0:
+                problems.append(f"exclusion reason '{k}' is negative ({v})")
         derived = {
             "records screened": self.screened,
             "reports sought for retrieval": self.sought,
@@ -243,11 +256,21 @@ class PrismaData:
                 w.writerow([key, label, n, url, "", note])
 
 
-def _to_int(raw: str, key: str) -> int:
+def _coerce(value, key: str) -> int:
+    """Accept ints, integer-valued floats and numeric strings; reject everything else."""
+    if isinstance(value, bool):
+        raise ValueError(f"Value for '{key}' must be a whole number, got {value!r}")
     try:
-        return int(float(raw.replace(",", "")))
-    except ValueError as exc:
-        raise ValueError(f"Value for '{key}' is not a number: {raw!r}") from exc
+        number = float(str(value).replace(",", "").strip())
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Value for '{key}' is not a number: {value!r}") from exc
+    if number != int(number):
+        raise ValueError(f"Value for '{key}' must be a whole number, got {value!r}")
+    return int(number)
+
+
+def _to_int(raw: str, key: str) -> int:
+    return _coerce(raw, key)
 
 
 def example_data() -> PrismaData:

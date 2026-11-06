@@ -29,7 +29,7 @@ pip install prismaflow
 |---|---|
 | Ubuntu / Debian | `sudo apt install graphviz` |
 | macOS | `brew install graphviz` |
-| Windows | `winget install Graphviz.Graphviz` (then restart the terminal) |
+| Windows | Installer from [graphviz.org/download](https://graphviz.org/download/); tick the option to add Graphviz to PATH, then restart the terminal |
 | conda | `conda install -c conda-forge graphviz` |
 
 Until it is on PyPI, install from source: `pip install git+https://github.com/Moses-L/prismaflow`.
@@ -99,6 +99,10 @@ Add a `url` and/or `tooltip` to any row. In the HTML output, hovering shows the 
 - Phase labels ("Identification", "Screening", "Included") are horizontal boxes, not the rotated side banners of the official template.
 - Layout is automatic. Very long exclusion-reason lists make wide boxes, so keep reason text short.
 - Only the new-review templates with previous and other-methods arms are implemented. Please open an issue if you need something else.
+
+## Examples
+
+The `examples/` folder has a filled-in `example.csv`, a blank `template.csv`, and the matching PNG, SVG and interactive HTML output.
 
 ## Development
 

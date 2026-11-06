@@ -33,18 +33,18 @@ def main(argv=None) -> int:
         print(f"Wrote {args.output}")
         return 0
 
-    if args.example:
-        data = example_data()
-    elif args.csv:
-        data = PrismaData.from_csv(args.csv)
-    else:
+    if not args.example and not args.csv:
         d.error("provide a CSV file or use --example")
     try:
+        data = example_data() if args.example else PrismaData.from_csv(args.csv)
         for w in data.validate():
             print(f"warning: {w}", file=sys.stderr)
         for path in render(data, args.output, args.format, dpi=args.dpi, title=args.title):
             print(f"Wrote {path}")
-    except ValueError as exc:
+    except FileNotFoundError as exc:
+        print(f"error: file not found: {exc.filename}", file=sys.stderr)
+        return 1
+    except (ValueError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     return 0
