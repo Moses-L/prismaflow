@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moseslukeprismagraphpy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Create PRISMA 2020 systematic review flow diagrams in Python (PNG, SVG, PDF and interactive HTML)."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "moseslukeprismagraphpy: PRISMA 2020 flow diagrams in Python"
-version: 0.1.0
+version: 0.1.1
 date-released: 2026-11-06
 license: MIT
 authors:
@@ -9,3 +9,14 @@ authors:
     given-names: Moses
     orcid: "https://orcid.org/0000-0002-0600-6660"
 repository-code: "https://github.com/Moses-L/prismaflow"
+abstract: >-
+  Python package and command-line tool for creating PRISMA 2020 systematic review flow
+  diagrams from screening counts or a CSV template. Calculates downstream counts, validates
+  them, and exports PNG, SVG, PDF and interactive HTML. An independent reimplementation
+  inspired by the PRISMA2020 R package; not affiliated with the PRISMA group.
+keywords:
+  - PRISMA 2020
+  - systematic review
+  - meta-analysis
+  - flow diagram
+  - evidence synthesis

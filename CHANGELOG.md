@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 (2026-11-06)
+
+- Documentation: install instructions now point to PyPI
+- Richer citation metadata in `CITATION.cff` (abstract and keywords) for archiving on Zenodo
+- No changes to behaviour
+
 ## 0.1.0 (2026-11-06)
 
 First release.
