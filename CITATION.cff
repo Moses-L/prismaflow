@@ -4,6 +4,7 @@ title: "moseslukeprismagraphpy: PRISMA 2020 flow diagrams in Python"
 version: 0.1.1
 date-released: 2026-11-06
 license: MIT
+doi: 10.5281/zenodo.24004986
 authors:
   - family-names: Luke
     given-names: Moses
