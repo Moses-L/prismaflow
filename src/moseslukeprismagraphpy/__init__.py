@@ -1,4 +1,4 @@
-"""prismaflow: PRISMA 2020 flow diagrams in Python."""
+"""moseslukeprismagraphpy: PRISMA 2020 flow diagrams in Python."""
 
 from .data import PrismaData, example_data
 from .render import build_graph, render, to_html, to_svg

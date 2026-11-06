@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "prismaflow"
+name = "moseslukeprismagraphpy"
 version = "0.1.0"
 description = "Create PRISMA 2020 systematic review flow diagrams in Python (PNG, SVG, PDF and interactive HTML)."
 readme = "README.md"
@@ -27,7 +27,7 @@ dependencies = ["graphviz>=0.20"]
 dev = ["pytest>=7"]
 
 [project.scripts]
-prismaflow = "prismaflow.cli:main"
+prismagraph = "moseslukeprismagraphpy.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Moses-L/prismaflow"

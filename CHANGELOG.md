@@ -8,4 +8,4 @@ First release.
 - Optional previous-studies and other-methods arms
 - Automatic downstream counts, validation errors and consistency warnings
 - PNG, SVG, PDF, interactive HTML and DOT output
-- `prismaflow` command line (`template`, `draw`)
+- `prismagraph` command line (`template`, `draw`)

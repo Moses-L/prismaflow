@@ -2,8 +2,8 @@ import shutil
 
 import pytest
 
-from prismaflow import PrismaData, example_data, render, to_html
-from prismaflow.cli import main
+from moseslukeprismagraphpy import PrismaData, example_data, render, to_html
+from moseslukeprismagraphpy.cli import main
 
 needs_dot = pytest.mark.skipif(shutil.which("dot") is None, reason="Graphviz 'dot' not installed")
 
@@ -160,7 +160,7 @@ def test_csv_bom_comments_commas(tmp_path):
     ["Path C:\\new\\left", "ends with \\", 'Wrong "design" & <scope>', "a|b {c}", "Étude – 研究"],
 )
 def test_user_text_rendered_literally(reason):
-    from prismaflow import to_svg
+    from moseslukeprismagraphpy import to_svg
 
     d = basic()
     d.reasons_db = {reason: 10}

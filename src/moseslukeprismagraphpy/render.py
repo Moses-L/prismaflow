@@ -246,7 +246,7 @@ def to_html(data: PrismaData, title: str = "PRISMA 2020 flow diagram") -> str:
         "a{cursor:pointer}</style></head><body>"
         f"<h2>{html.escape(title)}</h2>{svg}"
         "<p style=\"font-size:.8rem;color:#555\">Hover over a box for details; click linked boxes to open "
-        "supporting material. Generated with prismaflow.</p></body></html>"
+        "supporting material. Generated with moseslukeprismagraphpy.</p></body></html>"
     )
 
 

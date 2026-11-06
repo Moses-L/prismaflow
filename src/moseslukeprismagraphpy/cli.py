@@ -1,4 +1,4 @@
-"""Command-line interface: ``prismaflow template`` and ``prismaflow draw``."""
+"""Command-line interface: ``prismagraph template`` and ``prismagraph draw``."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from .render import ALL_FORMATS, render
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(prog="prismaflow", description="PRISMA 2020 flow diagrams from a CSV.")
-    p.add_argument("--version", action="version", version=f"prismaflow {__version__}")
+    p = argparse.ArgumentParser(prog="prismagraph", description="PRISMA 2020 flow diagrams from a CSV.")
+    p.add_argument("--version", action="version", version=f"prismagraph {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     t = sub.add_parser("template", help="write a blank CSV template")

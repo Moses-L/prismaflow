@@ -1,12 +1,14 @@
-# prismaflow
+# moseslukeprismagraphpy
 
 Create **PRISMA 2020** systematic review flow diagrams in Python. Give it your screening counts (in code or a CSV) and it produces a publication-ready diagram as PNG, SVG or PDF, plus an **interactive HTML** version in which readers can hover for tooltips and click boxes to open supporting files.
 
 It is built on Graphviz, so it runs in scripts, notebooks and CI pipelines without a browser.
 
+`pip install moseslukeprismagraphpy`, then `import moseslukeprismagraphpy` in Python or run the `prismagraph` command in a terminal. The source lives in the GitHub repository `Moses-L/prismaflow`.
+
 ## Why this exists
 
-The [PRISMA2020 R package and Shiny app](https://doi.org/10.1002/cl2.1230) (Haddaway et al., 2022) made PRISMA 2020 diagrams easy for R users. `prismaflow` offers the same kind of workflow for Python users. It is an independent reimplementation, not a port of that code, and it is not affiliated with the PRISMA group or the R package authors. Please also cite the original tool and the PRISMA 2020 statement if they informed your work (see [Citing](#citing)).
+The [PRISMA2020 R package and Shiny app](https://doi.org/10.1002/cl2.1230) (Haddaway et al., 2022) made PRISMA 2020 diagrams easy for R users. `moseslukeprismagraphpy` offers the same kind of workflow for Python users. It is an independent reimplementation, not a port of that code, and it is not affiliated with the PRISMA group or the R package authors. Please also cite the original tool and the PRISMA 2020 statement if they informed your work (see [Citing](#citing)).
 
 ## Features
 
@@ -20,10 +22,10 @@ The [PRISMA2020 R package and Shiny app](https://doi.org/10.1002/cl2.1230) (Hadd
 ## Install
 
 ```bash
-pip install prismaflow
+pip install moseslukeprismagraphpy
 ```
 
-`prismaflow` needs the Graphviz program (not only the Python wrapper):
+`moseslukeprismagraphpy` needs the Graphviz program (not only the Python wrapper):
 
 | System | Command |
 |---|---|
@@ -43,16 +45,16 @@ Until it is on PyPI, install from source: `pip install git+https://github.com/Mo
 ### From the command line
 
 ```bash
-prismaflow template -o my_review.csv        # blank template
+prismagraph template -o my_review.csv        # blank template
 # fill in the n column, then:
-prismaflow draw my_review.csv -o figures/prisma -f png svg html
-prismaflow draw --example -o demo -f png    # built-in worked example
+prismagraph draw my_review.csv -o figures/prisma -f png svg html
+prismagraph draw --example -o demo -f png    # built-in worked example
 ```
 
 ### From Python
 
 ```python
-from prismaflow import PrismaData, render
+from moseslukeprismagraphpy import PrismaData, render
 
 data = PrismaData(
     counts={
@@ -114,7 +116,7 @@ pytest
 
 ## Citing
 
-If you use `prismaflow`, please cite this software (see `CITATION.cff`) and the PRISMA 2020 statement:
+If you use `moseslukeprismagraphpy`, please cite this software (see `CITATION.cff`) and the PRISMA 2020 statement:
 
 - Page MJ, McKenzie JE, Bossuyt PM, et al. The PRISMA 2020 statement: an updated guideline for reporting systematic reviews. *BMJ* 2021;372:n71. https://doi.org/10.1136/bmj.n71
 - Haddaway NR, Page MJ, Pritchard CC, McGuinness LA. PRISMA2020: An R package and Shiny app for producing PRISMA 2020-compliant flow diagrams, with interactivity for optimised digital transparency and Open Synthesis. *Campbell Systematic Reviews* 2022;18:e1230. https://doi.org/10.1002/cl2.1230
