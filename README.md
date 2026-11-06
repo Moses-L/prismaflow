@@ -34,7 +34,7 @@ pip install moseslukeprismagraphpy
 | Windows | Installer from [graphviz.org/download](https://graphviz.org/download/); tick the option to add Graphviz to PATH, then restart the terminal |
 | conda | `conda install -c conda-forge graphviz` |
 
-Until it is on PyPI, install from source: `pip install git+https://github.com/Moses-L/prismaflow`.
+To install the latest unreleased version from GitHub: pip install git+https://github.com/Moses-L/prismaflow`.
 
 ## Example output
 
