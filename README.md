@@ -1,5 +1,7 @@
 # moseslukeprismagraphpy
 
+[![DOI](https://zenodo.org/badge/1447951698.svg)](https://doi.org/10.5281/zenodo.24004986)
+
 Create **PRISMA 2020** systematic review flow diagrams in Python. Give it your screening counts (in code or a CSV) and it produces a publication-ready diagram as PNG, SVG or PDF, plus an **interactive HTML** version in which readers can hover for tooltips and click boxes to open supporting files.
 
 It is built on Graphviz, so it runs in scripts, notebooks and CI pipelines without a browser.
